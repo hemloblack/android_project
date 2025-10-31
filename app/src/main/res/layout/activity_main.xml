@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0F0F23"
+    android:padding="16dp">
+
+    <!-- هدر -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="100dp"
+        android:layout_marginBottom="20dp"
+        android:padding="20dp"
+        android:background="#1E1B62"
+        android:elevation="8dp"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📖 کتابخانه من"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#E2E8F0"
+            android:letterSpacing="0.02" />
+
+    </LinearLayout>
+
+    <!-- لیست -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="#1E1B4B"
+        android:elevation="6dp"
+        android:backgroundTint="#1E1B4B"
+        android:padding="8dp">
+
+        <ListView
+            android:id="@+id/pdfListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="#2D3748"
+            android:dividerHeight="1dp"
+            android:cacheColorHint="@android:color/transparent" />
+
+    </LinearLayout>
+
+    <!-- دکمه -->
+    <Button
+        android:id="@+id/btnAddPdf"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="16dp"
+        android:text="➕ افزودن فایل جدید"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:background="#8B5CF6"
+        android:backgroundTint="#8B5CF6"
+        android:textColor="#FFFFFF"
+        android:elevation="8dp"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>
