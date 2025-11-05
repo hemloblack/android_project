@@ -4,12 +4,18 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +29,8 @@ public class MainActivity extends AppCompatActivity {
 
     Button btnAddPdf;
     ListView pdfListView;
+    ImageView pdfPreview;
+    TextView txtPreviewFileName;
     ArrayList<String> pdfNames = new ArrayList<>();
     ArrayList<String> pdfInternalPaths = new ArrayList<>();
     ArrayAdapter<String> adapter;
@@ -34,8 +42,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+
         btnAddPdf = findViewById(R.id.btnAddPdf);
         pdfListView = findViewById(R.id.pdfListView);
+
+
+        try {
+            pdfPreview = findViewById(R.id.pdfPreview);
+            txtPreviewFileName = findViewById(R.id.txtPreviewFileName);
+        } catch (Exception e) {
+            pdfPreview = null;
+            txtPreviewFileName = null;
+        }
 
         adapter = new ArrayAdapter<String>(this, R.layout.list_item_modern, R.id.txtFileName, pdfNames) {
             @Override
@@ -59,10 +81,106 @@ public class MainActivity extends AppCompatActivity {
 
         pdfListView.setOnItemClickListener((parent, view, position, id) -> {
             String internalPath = pdfInternalPaths.get(position);
-            openPdf(internalPath);
+
+
+            if (isLandscapeMode() && pdfPreview != null && txtPreviewFileName != null) {
+                showLandscapePreview(internalPath);
+            } else {
+
+                openPdf(internalPath);
+            }
         });
 
         loadExistingFiles();
+    }
+
+
+    private boolean isLandscapeMode() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+
+    private void showLandscapePreview(String pdfPath) {
+        try {
+            Bitmap previewBitmap = createSimplePreview(pdfPath);
+            if (pdfPreview != null) {
+                pdfPreview.setImageBitmap(previewBitmap);
+                pdfPreview.setVisibility(View.VISIBLE);
+            }
+
+
+            File file = new File(pdfPath);
+            String fileName = file.getName();
+            if (txtPreviewFileName != null) {
+                txtPreviewFileName.setText(fileName);
+            }
+
+            Toast.makeText(this, "پیش‌نمایش نمایش داده شد", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            if (txtPreviewFileName != null) {
+                txtPreviewFileName.setText("خطا در نمایش پیش‌نمایش");
+            }
+            Toast.makeText(this, "خطا در ایجاد پیش‌نمایش", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    private Bitmap createSimplePreview(String pdfPath) {
+        try {
+            int width = 400;
+            int height = 500;
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+
+
+            canvas.drawColor(Color.WHITE);
+
+            Paint paint = new Paint();
+            paint.setColor(Color.BLUE);
+            paint.setTextSize(60);
+            paint.setTextAlign(Paint.Align.CENTER);
+
+
+            canvas.drawText("📄", width / 2, height / 2 - 50, paint);
+
+
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(30);
+            canvas.drawText("PDF File", width / 2, height / 2 + 20, paint);
+
+
+            paint.setTextSize(20);
+            paint.setColor(Color.GRAY);
+            File file = new File(pdfPath);
+            String fileName = file.getName();
+            if (fileName.length() > 20) {
+                fileName = fileName.substring(0, 17) + "...";
+            }
+            canvas.drawText(fileName, width / 2, height / 2 + 70, paint);
+
+
+            paint.setColor(Color.LTGRAY);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(4);
+            canvas.drawRect(5, 5, width - 5, height - 5, paint);
+
+            return bitmap;
+
+        } catch (Exception e) {
+
+            Bitmap bitmap = Bitmap.createBitmap(400, 500, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawColor(Color.WHITE);
+
+            Paint paint = new Paint();
+            paint.setColor(Color.RED);
+            paint.setTextSize(30);
+            paint.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText("خطا در پیش‌نمایش", 200, 250, paint);
+
+            return bitmap;
+        }
     }
 
     private void openPdf(String pdfPath) {
@@ -94,6 +212,14 @@ public class MainActivity extends AppCompatActivity {
             if (uri != null) {
                 copyFileToInternalStorage(uri);
                 adapter.notifyDataSetChanged();
+
+
+                if (pdfPreview != null) {
+                    pdfPreview.setVisibility(View.GONE);
+                }
+                if (txtPreviewFileName != null) {
+                    txtPreviewFileName.setText("فایلی انتخاب نشده است");
+                }
             }
         }
     }
